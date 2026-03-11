@@ -19,6 +19,17 @@ public class DatabaseConnection {
 
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
+            try {
+                // Explicitly load the SQLite driver class.
+                // This is required when the jar is added manually (e.g. IntelliJ module dependency)
+                // rather than via a build tool like Maven/Gradle.
+                Class.forName("org.sqlite.JDBC");
+            } catch (ClassNotFoundException e) {
+                throw new SQLException(
+                        "SQLite JDBC driver not found on classpath.\n" +
+                                "Fix: File → Project Structure → Modules → Dependencies → '+' → " +
+                                "add sqlite-jdbc-x.x.x.jar", e);
+            }
             connection = DriverManager.getConnection(URL);
             connection.setAutoCommit(true);
         }
